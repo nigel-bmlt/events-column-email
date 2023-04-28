@@ -1,0 +1,10 @@
+{
+    "name": "nigel-bmlt/events-column-email",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "nigel-bmlt"
+        }
+    ],
+    "require": {}
+}
