@@ -51,6 +51,14 @@ if (!class_exists('ece_plugin')) {
 
         public function ece_post() {
             error_log("got post postid {$_REQUEST['data']}");
+            $args = array(
+                'ID' => $_REQUEST['data'],
+                );
+             
+            $query = tribe_get_events($args);
+             
+            $this->debug_log($query);
+                          
         }
 
         public function ece_filter_posts_columns( $columns ) {
@@ -61,7 +69,8 @@ if (!class_exists('ece_plugin')) {
         public function ece_filter_posts_custom_column( $column,$post_id ) {
             if($column === 'email')
             {
-                echo '<a href="http://wordpress-php8-singlesite//wp-admin/admin-post.php?action=ece_post&data='.$post_id.'">Email</a>';
+                echo '<button type="button" class="ece_email_button" data-adminurl="'.admin_url('admin-post.php').'" data-postid="'.$post_id.'">Email</button>';
+                // echo '<a href="http://wordpress-php8-singlesite//wp-admin/admin-post.php?action=ece_post&data='.$post_id.'">Email</a>';
             }
         }
 
@@ -92,11 +101,11 @@ if (!class_exists('ece_plugin')) {
 
             $this->debug_log($hook);
 
+            $this->prevent_cache_enqueue_script('ecejs', array('jquery','wp-i18n'), 'js/ece_script.js');
+
             if ($hook != 'toplevel_page_ece-settings') {
                 return;
             }
-
-            $this->prevent_cache_enqueue_script('ecejs', array('jquery','wp-i18n'), 'js/script_includes.js');
 
             switch ($hook) {
 
