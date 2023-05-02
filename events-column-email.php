@@ -37,7 +37,6 @@ if (!class_exists('ece_plugin')) {
         public function __construct()
         {
             // actions, shortcodes, menus and filters
-            add_action('wp_enqueue_scripts', array(&$this, 'ece_enqueue_form_deps'));
             add_action('admin_menu', array(&$this, 'ece_menu_pages'));
             add_action('admin_enqueue_scripts', array(&$this, 'ece_admin_scripts'));
             add_action('admin_init',  array(&$this, 'ece_register_setting'));
@@ -49,16 +48,45 @@ if (!class_exists('ece_plugin')) {
 
         }
 
+
         public function ece_post() {
             error_log("got post postid {$_REQUEST['data']}");
-            $args = array(
-                'ID' => $_REQUEST['data'],
-                );
+            $postid = $_REQUEST['data'];
              
-            $query = tribe_get_events($args);
-             
-            $this->debug_log($query);
-                          
+            $start_date = tribe_get_start_date($postid, true);
+            $end_date = tribe_get_end_date($postid, true);
+            $organizer = tribe_get_organizer($postid);
+            $organizer_phone = tribe_get_organizer_phone($postid);
+            $organizer_email = tribe_get_organizer_email($postid);
+            $phone = tribe_get_phone($postid);
+            $venue = tribe_get_venue($postid);
+            $address= tribe_get_address($postid, true);
+            $city = tribe_get_city($postid, true);
+            $province = tribe_get_province($postid);
+            $region = tribe_get_region($postid);
+            $country = tribe_get_country($postid);
+
+            $email = <<<EOT
+Event details:
+Start Date: {$start_date}
+End Date: {$end_date}
+Organizer: {$organizer}
+Organizer Phone: {$organizer_phone}
+Organizer Email: {$organizer_email}
+Phone: {$phone}
+Venue: {$venue}
+Venue Address: {$address}
+City: {$city}
+Province: {$province}
+Region: {$region}
+Country: {$country}
+EOT;
+            $headers = array("From", get_option('ece_email_from_address'));
+            wp_mail(get_option('ece_email_to_address'),'NA Requested Event Details',$email);
+            $this->debug_log("sending email to ".get_option('ece_email_to_address'));
+            $this->debug_log("sending email from ".get_option('ece_email_from_address'));
+            $this->debug_log("email body: ");
+            $this->debug_log($email);
         }
 
         public function ece_filter_posts_columns( $columns ) {
