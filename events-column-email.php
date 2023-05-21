@@ -20,7 +20,7 @@
  * Plugin Name: Events Column Email
  * Plugin URI: Events Column Email
  * Description: Events Column Email
- * Version: 1.0
+ * Version: 1.1
  * Requires at least: 5.2
  * Tested up to: 6.2
  * Author: @nigel-bmlt
@@ -198,7 +198,7 @@ EOT;
                 array(
                     'type' => 'string',
                     'description' => 'From Address',
-                    'sanitize_callback' => array(&$this, 'ece_email_address_sanitize_callback'),
+                    'sanitize_callback' => array(&$this, 'ece_email_from_address_sanitize_callback'),
                     'show_in_rest' => false,
                     'default' => 'example@example.com'
                 )
@@ -210,7 +210,7 @@ EOT;
                 array(
                     'type' => 'string',
                     'description' => 'To Address',
-                    'sanitize_callback' => array(&$this, 'ece_email_address_sanitize_callback'),
+                    'sanitize_callback' => array(&$this, 'ece_email_to_address_sanitize_callback'),
                     'show_in_rest' => false,
                     'default' => 'example@example.com'
                 )
@@ -241,12 +241,27 @@ EOT;
 
         }
 
-        public function ece_email_address_sanitize_callback($input)
+        public function ece_email_to_address_sanitize_callback($input)
         {
             $output = get_option('ece_email_from_address');
+            $emails = explode(',',$input);
+            foreach($emails as $i)
+            {
+                $sanitized_email = sanitize_email($i);
+                if (!is_email($sanitized_email)) {
+                    add_settings_error('ece_email_from_address', 'err', 'Invalid email address '.$i);
+                    return $output;
+                }
+            }
+            return implode(',',$emails);
+        }
+
+        public function ece_email_from_address_sanitize_callback($input)
+        {
+            $output = get_option('ece_email_to_address');
             $sanitized_email = sanitize_email($input);
             if (!is_email($sanitized_email)) {
-                add_settings_error('ece_email_from_address', 'err', 'Invalid email address.');
+                add_settings_error('ece_email_from_address', 'err','Invalid email from address.');
                 return $output;
             }
             return $sanitized_email;
